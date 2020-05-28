@@ -1,0 +1,14 @@
+
+credentials:
+    base_url : 'https://ilias.studium.kit.edu/'
+    url : "ilias.php?baseClass=ilPersonalDesktopGUI&cmd=jumpToSelectedItems"
+    login_url : "https://ilias.studium.kit.edu/login.php?target=&client_id=produktiv&cmd=force_login&lang=de"
+    uname : "uname"
+    password : 'password'
+
+    # The place where files get safed
+    base_path : "ilias"
+    
+    # Dont get to crazy here
+    num_threads : 4
+    num_download_threads : 6
