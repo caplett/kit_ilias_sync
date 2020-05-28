@@ -5,11 +5,11 @@ import os
 import shutil
 import yaml
 import threading
-from selenium.webdriver.firefox.options import Options
 from queue import Queue, LifoQueue
 from bs4 import BeautifulSoup
 import selenium
 from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver import ActionChains
 from selenium.common.exceptions import TimeoutException
@@ -17,13 +17,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
+cj = browser_cookie3.firefox()
+
 with open("config.yml", "r") as config_file:
     cfg = yaml.load(config_file)
 
 base_url = cfg['credentials']['base_url']
 url =  cfg['credentials']['url']
 
-cj = browser_cookie3.firefox()
 base_path = cfg['credentials']['base_path']
 
 login_url = cfg['credentials']['login_url']
