@@ -22,6 +22,11 @@ Cookies get loaded from the firefox cookies sqlite file.
 You need to have active ilias cookies your firefox instance.
 Open a new window and login to your ilias accout. Repeat 2 time. Dont know why its not working first time.
 
+### Password requirements
+
+Currently passwords with a '\' letter have problems getting escaped and do not work.
+You can change you password or fix the issue.
+
 ## Getting Started
 
 Move config.yml.back to config.yml
