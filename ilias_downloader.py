@@ -148,7 +148,7 @@ def crawl_url(q, dq, browser, cj):
                         [item.attrs["href"].replace(base_url, ""), path, True,]
                     )
             except selenium.common.exceptions.TimeoutException:
-                q.put(next_url, path, True)
+                q.put([next_url, path, True])
 
 
 def crawl_worker_loop(q, dq, browser, cj):
