@@ -29,7 +29,7 @@ base_path = cfg["credentials"]["base_path"]
 
 login_url = cfg["credentials"]["login_url"]
 uname = cfg["credentials"]["uname"]
-password = cfg["credentials"]["url"]
+password = cfg["credentials"]["password"]
 
 
 def create_browser(options, url, uname, password):
@@ -175,10 +175,10 @@ browsers = [
 ]
 
 browser_cookies = browsers[0].get_cookies()
-# login_cookies = dict()
+login_cookies = dict()
 
-# for c in browser_cookies:
-# login_cookies[str(c['name'])]= str(c['value'])
+for c in browser_cookies:
+    login_cookies[str(c['name'])]= str(c['value'])
 
 # q = Queue()
 q = LifoQueue()
@@ -187,7 +187,7 @@ q.put([url, base_path, False])
 dq = Queue()
 
 for i in range(num_threads):
-    worker = threading.Thread(target=crawl_worker_loop, args=(q, dq, browsers[i], cj))
+    worker = threading.Thread(target=crawl_worker_loop, args=(q, dq, browsers[i], login_cookies))
     worker.setDaemon(True)
     worker.start()
 
