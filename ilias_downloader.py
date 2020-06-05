@@ -76,7 +76,7 @@ def crawl_url(q, dq, browser, cj):
 
         if expect_video == False:
             r = requests.get(base_url + next_url, cookies=cj)
-            soup = BeautifulSoup(r.text, "html.parser")
+            soup = BeautifulSoup(r.text, "lxml")
             items = soup.find_all("a", class_="il_ContainerItemTitle")
             if items:
                 if not os.path.exists(path):
@@ -128,7 +128,7 @@ def crawl_url(q, dq, browser, cj):
                     .replace("/", "")
                     + ".mp4"
                 )
-                soup = BeautifulSoup(browser.page_source, "html.parser")
+                soup = BeautifulSoup(browser.page_source, "lxml")
                 items = soup.find_all("source")
                 if items:
                     video_url = items[0].attrs["src"]
@@ -144,11 +144,15 @@ def crawl_url(q, dq, browser, cj):
                         os.makedirs(path)
 
                 for item in items:
-                    q.put(
-                        [item.attrs["href"].replace(base_url, ""), path, True,]
-                    )
+                    if item.string=='Abspielen':
+                        q.put(
+                            [item.attrs["href"].replace(base_url, ""), path, True,]
+                        )
+                    else:
+                        print("Skipped Download button")
             except selenium.common.exceptions.TimeoutException:
-                q.put([next_url, path, True])
+                print(f"Timeout at {path}/{next_url}")
+                # q.put([next_url, path, True])
 
 
 def crawl_worker_loop(q, dq, browser, cj):
@@ -191,13 +195,12 @@ for i in range(num_threads):
     worker.setDaemon(True)
     worker.start()
 
-
 for i in range(num_download_threads):
     worker = threading.Thread(target=downloader_worker_loop, args=(dq,))
     worker.setDaemon(True)
     worker.start()
 
-# crawl_worker_loop(q, dq, browsers[0], cj)
+#crawl_worker_loop(q, dq, browsers[0], cj)
 # downloader_worker_loop(dq)
 
 q.join()
