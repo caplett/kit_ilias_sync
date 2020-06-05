@@ -61,6 +61,7 @@ def create_browser(options, url, uname, password):
 
 def download_file(dq):
     url, name = dq.get()
+    print("New Download Started")
     local_filename = name
     with requests.get(url, stream=True) as r:
         with open(local_filename, "wb") as f:
@@ -144,7 +145,7 @@ def crawl_url(q, dq, browser, cj):
                         os.makedirs(path)
 
                 for item in items:
-                    if item.string=='Abspielen':
+                    if item.string == "Abspielen":
                         q.put(
                             [item.attrs["href"].replace(base_url, ""), path, True,]
                         )
@@ -182,7 +183,7 @@ browser_cookies = browsers[0].get_cookies()
 login_cookies = dict()
 
 for c in browser_cookies:
-    login_cookies[str(c['name'])]= str(c['value'])
+    login_cookies[str(c["name"])] = str(c["value"])
 
 # q = Queue()
 q = LifoQueue()
@@ -190,18 +191,30 @@ q.put([url, base_path, False])
 
 dq = Queue()
 
-for i in range(num_threads):
-    worker = threading.Thread(target=crawl_worker_loop, args=(q, dq, browsers[i], login_cookies))
-    worker.setDaemon(True)
-    worker.start()
+# Check if user is logged in
+r_login_check = requests.get(base_url + url, cookies=login_cookies)
+soup_login_check = BeautifulSoup(r_login_check.text, "lxml")
 
-for i in range(num_download_threads):
-    worker = threading.Thread(target=downloader_worker_loop, args=(dq,))
-    worker.setDaemon(True)
-    worker.start()
+login_check = soup_login_check.find_all("a", string="Anmelden")
 
-#crawl_worker_loop(q, dq, browsers[0], cj)
-# downloader_worker_loop(dq)
+if login_check:
+    print("Not logged in")
 
-q.join()
-dq.join()
+else:
+    for i in range(num_threads):
+        worker = threading.Thread(
+            target=crawl_worker_loop, args=(q, dq, browsers[i], login_cookies)
+        )
+        worker.setDaemon(True)
+        worker.start()
+
+    for i in range(num_download_threads):
+        worker = threading.Thread(target=downloader_worker_loop, args=(dq,))
+        worker.setDaemon(True)
+        worker.start()
+
+    # crawl_worker_loop(q, dq, browsers[0], cj)
+    # downloader_worker_loop(dq)
+
+    q.join()
+    dq.join()
