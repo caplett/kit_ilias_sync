@@ -31,6 +31,7 @@ login_url = cfg["credentials"]["login_url"]
 uname = cfg["credentials"]["uname"]
 password = cfg["credentials"]["password"]
 
+seen_urls = []
 
 def create_browser(options, url, uname, password):
     print("Setup Browser")
@@ -70,90 +71,98 @@ def download_file(dq):
 
 def crawl_url(q, dq, browser, cj):
     next_url, path, expect_video = q.get()
-    print(f"Processing {path}")
+    (f"Some test")
 
-    r_head = requests.get(base_url + next_url, cookies=cj, stream=True)
-    if r_head.headers["Content-Type"] != "application/pdf":
+    global seen_urls
 
-        if expect_video == False:
-            r = requests.get(base_url + next_url, cookies=cj)
-            soup = BeautifulSoup(r.text, "lxml")
-            items = soup.find_all("a", class_="il_ContainerItemTitle")
-            if items:
-                if not os.path.exists(path):
-                    os.makedirs(path)
+    if next_url in seen_urls:
+        print(f"Skipping {next_url}. already seen")
+    else:    
+    
+        print(f"Processing {path}")
 
-            list_containers = soup.find_all(class_="ilContainerListItemOuter")
+        r_head = requests.get(base_url + next_url, cookies=cj, stream=True)
+        if r_head.headers["Content-Type"] != "application/pdf":
 
-            for container in list_containers:
-                # Check if opencast logo is on page
-                container_items = container.find_all(
-                    "a", class_="il_ContainerItemTitle"
-                )
-                if container.find_all(title="Symbol Opencast"):
-
-                    for item in container_items:
-                        q.put(
-                            [
-                                item.attrs["href"].replace(base_url, ""),
-                                path
-                                + "/"
-                                + item.string.replace(" ", "_").translate(
-                                    {ord(i): None for i in '/,"{}()[]'}
-                                ),
-                                True,
-                            ]
-                        )
-                else:
-                    for item in container_items:
-                        q.put(
-                            [
-                                item.attrs["href"].replace(base_url, ""),
-                                path
-                                + "/"
-                                + item.string.replace(" ", "_").translate(
-                                    {ord(i): None for i in '/,"{}()[]'}
-                                ),
-                                False,
-                            ]
-                        )
-
-        if expect_video == True:
-            try:
-                browser.get(base_url + next_url)
-                time.sleep(20)
-                name = (
-                    browser.title.replace(" ", "")
-                    .replace(",", "")
-                    .replace(".mp4", "")
-                    .replace("/", "")
-                    + ".mp4"
-                )
-                soup = BeautifulSoup(browser.page_source, "lxml")
-                items = soup.find_all("source")
-                if items:
-                    video_url = items[0].attrs["src"]
-                    if not os.path.isfile(path + "/" + name):
-                        print(f"Downloading {path}/{name}")
-                        dq.put([video_url, path + "/" + name])
-                    else:
-                        print(f"Skipped {path}/{name}")
-
-                items = soup.find_all("a", class_="btn btn-info")
+            if expect_video == False:
+                r = requests.get(base_url + next_url, cookies=cj)
+                soup = BeautifulSoup(r.text, "lxml")
+                items = soup.find_all("a", class_="il_ContainerItemTitle")
                 if items:
                     if not os.path.exists(path):
                         os.makedirs(path)
 
-                for item in items:
-                    if item.string == "Abspielen":
-                        q.put(
-                            [item.attrs["href"].replace(base_url, ""), path, True,]
-                        )
+                list_containers = soup.find_all(class_="ilContainerListItemOuter")
+
+                for container in list_containers:
+                    # Check if opencast logo is on page
+                    container_items = container.find_all(
+                        "a", class_="il_ContainerItemTitle"
+                    )
+                    if container.find_all(title="Symbol Opencast"):
+
+                        for item in container_items:
+                            q.put(
+                                [
+                                    item.attrs["href"].replace(base_url, ""),
+                                    path
+                                    + "/"
+                                    + item.string.replace(" ", "_").translate(
+                                        {ord(i): None for i in '/,"{}()[]'}
+                                    ),
+                                    True,
+                                ]
+                            )
                     else:
-                        print("Skipped Download button")
-            except selenium.common.exceptions.TimeoutException:
-                print(f"Timeout at {path}/{next_url}")
-                # q.put([next_url, path, True])
+                        for item in container_items:
+                            q.put(
+                                [
+                                    item.attrs["href"].replace(base_url, ""),
+                                    path
+                                    + "/"
+                                    + item.string.replace(" ", "_").translate(
+                                        {ord(i): None for i in '/,"{}()[]'}
+                                    ),
+                                    False,
+                                ]
+                            )
+
+            if expect_video == True:
+                try:
+                    browser.get(base_url + next_url)
+                    time.sleep(20)
+                    name = (
+                        browser.title.replace(" ", "")
+                        .replace(",", "")
+                        .replace(".mp4", "")
+                        .replace("/", "")
+                        + ".mp4"
+                    )
+                    soup = BeautifulSoup(browser.page_source, "lxml")
+                    items = soup.find_all("source")
+                    if items:
+                        video_url = items[0].attrs["src"]
+                        if not os.path.isfile(path + "/" + name):
+                            print(f"Downloading {path}/{name}")
+                            dq.put([video_url, path + "/" + name])
+                        else:
+                            print(f"Skipped {path}/{name}")
+
+                    items = soup.find_all("a", class_="btn btn-info")
+                    if items:
+                        if not os.path.exists(path):
+                            os.makedirs(path)
+
+                    for item in items:
+                        if item.string == "Abspielen":
+                            q.put(
+                                [item.attrs["href"].replace(base_url, ""), path, True,]
+                            )
+                        else:
+                            print("Skipped Download button")
+                except selenium.common.exceptions.TimeoutException:
+                    print(f"Timeout at {path}/{next_url}")
+                    # q.put([next_url, path, True])
 
 
 def crawl_worker_loop(q, dq, browser, cj):
