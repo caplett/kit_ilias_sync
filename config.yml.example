@@ -11,4 +11,3 @@ credentials:
     
     # Dont get to crazy here
     num_threads : 4
-    num_download_threads : 6

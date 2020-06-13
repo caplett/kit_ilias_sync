@@ -60,16 +60,7 @@ def create_browser(options, url, uname, password):
     return browser
 
 
-def download_file(dq):
-    url, name = dq.get()
-    print("New Download Started")
-    local_filename = name
-    with requests.get(url, stream=True) as r:
-        with open(local_filename, "wb") as f:
-            shutil.copyfileobj(r.raw, f)
-
-
-def crawl_url(q, dq, browser, cj):
+def crawl_url(q, browser, cj):
     next_url, path, expect_video = q.get()
     (f"Some test")
 
@@ -147,7 +138,10 @@ def crawl_url(q, dq, browser, cj):
                         video_url = items[0].attrs["src"]
                         if not os.path.isfile(path + "/" + name):
                             print(f"Downloading {path}/{name}")
-                            dq.put([video_url, path + "/" + name])
+                            filename = path + "/" + name
+                            with requests.get(video_url, stream=True) as r:
+                                with open(filename, "wb") as f:
+                                    shutil.copyfileobj(r.raw, f)
                         else:
                             print(f"Skipped {path}/{name}")
 
@@ -178,25 +172,17 @@ def crawl_url(q, dq, browser, cj):
                     # q.put([next_url, path, True])
 
 
-def crawl_worker_loop(q, dq, browser, cj):
+def crawl_worker_loop(q, browser, cj):
     while True:
         print(f"{q.qsize()} Items in broser queue")
-        crawl_url(q, dq, browser, cj)
+        crawl_url(q, browser, cj)
         q.task_done()
-
-
-def downloader_worker_loop(dq):
-    while True:
-        print(f"{dq.qsize()} Items in download queue")
-        download_file(dq)
-        dq.task_done()
 
 
 options = Options()
 options.headless = True
 
 num_threads = cfg["credentials"]["num_threads"]
-num_download_threads = cfg["credentials"]["num_download_threads"]
 browsers = [
     create_browser(options, login_url, uname, password) for _ in range(num_threads)
 ]
@@ -211,8 +197,6 @@ for c in browser_cookies:
 q = LifoQueue()
 q.put([url, base_path, False])
 
-dq = Queue()
-
 # Check if user is logged in
 r_login_check = requests.get(base_url + url, cookies=login_cookies)
 soup_login_check = BeautifulSoup(r_login_check.text, "lxml")
@@ -225,18 +209,11 @@ if login_check:
 else:
     for i in range(num_threads):
         worker = threading.Thread(
-            target=crawl_worker_loop, args=(q, dq, browsers[i], login_cookies)
+            target=crawl_worker_loop, args=(q, browsers[i], login_cookies)
         )
         worker.setDaemon(True)
         worker.start()
 
-    for i in range(num_download_threads):
-        worker = threading.Thread(target=downloader_worker_loop, args=(dq,))
-        worker.setDaemon(True)
-        worker.start()
-
-    # crawl_worker_loop(q, dq, browsers[0], cj)
-    # downloader_worker_loop(dq)
+    # crawl_worker_loop(q, browsers[0], cj)
 
     q.join()
-    dq.join()
