@@ -82,6 +82,9 @@ def crawl_url(q, dq, browser, cj):
         print(f"Processing {path}")
 
         r_head = requests.get(base_url + next_url, cookies=cj, stream=True)
+        if r_head.status_code != 200:
+            print(f": error code {r_head.status_code} on: {base_url + next_url}")
+
         if r_head.headers["Content-Type"] != "application/pdf":
 
             if expect_video == False:
