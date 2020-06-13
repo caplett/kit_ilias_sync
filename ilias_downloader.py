@@ -163,6 +163,16 @@ def crawl_url(q, dq, browser, cj):
                             )
                         else:
                             print("Skipped Download button")
+
+                    a_items = soup.find_all("a")
+                    for item in a_items:
+                        if item.string == "weiter":
+                            print(f"found a next video page for {path}/{name}")
+                            q.put(
+                                [item.attrs["href"].replace(base_url, ""), path, True,]
+                            )
+
+
                 except selenium.common.exceptions.TimeoutException:
                     print(f"Timeout at {path}/{next_url}")
                     # q.put([next_url, path, True])
