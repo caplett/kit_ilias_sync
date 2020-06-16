@@ -6,8 +6,13 @@ credentials:
     uname : "uname"
     password : 'password'
 
+    # Download PDF files
+    pdf : false
+
     # The place where files get safed
     base_path : "ilias"
     
     # Dont get to crazy here
     num_threads : 4
+
+

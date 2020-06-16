@@ -31,6 +31,8 @@ login_url = cfg["credentials"]["login_url"]
 uname = cfg["credentials"]["uname"]
 password = cfg["credentials"]["password"]
 
+download_pdf = cfg["credentials"].get("pdf")
+
 seen_urls = []
 
 def create_browser(options, url, uname, password):
@@ -62,7 +64,6 @@ def create_browser(options, url, uname, password):
 
 def crawl_url(q, browser, cj):
     next_url, path, expect_video = q.get()
-    (f"Some test")
 
     global seen_urls
 
@@ -76,7 +77,32 @@ def crawl_url(q, browser, cj):
         if r_head.status_code != 200:
             print(f": error code {r_head.status_code} on: {base_url + next_url}")
 
-        if r_head.headers["Content-Type"] != "application/pdf":
+        if r_head.headers.get("Content-Type") == "application/pdf":
+            if download_pdf:
+                # pdf_name = r_head.headers["Content-Description"].replace(" ", "_").translate( {ord(i): None for i in '/,"{}()[]'})
+                pdf_name = path + ".pdf"
+                                    
+                print(f"downloading {pdf_name}")
+
+                if not os.path.isfile(pdf_name):
+                    with open(pdf_name, 'wb') as f:
+                        f.write(r_head.content)
+                else:
+                    print(f"Skipped {pdf_name}")
+
+        # Crude work around to not get problems with ipynb files.
+        elif r_head.headers.get("Content-Type") == "application/x-ipynb+json":
+            if download_pdf:
+                file_name = path + ".ipynb"
+                print(f"downloading {file_name}")
+
+                if not os.path.isfile(file_name):
+                    with open(file_name, 'wb') as f:
+                        f.write(r_head.content)
+                else:
+                    print(f"Skipped {file_name}")
+
+        else:
 
             if expect_video == False:
                 r = requests.get(base_url + next_url, cookies=cj)
@@ -214,6 +240,6 @@ else:
         worker.setDaemon(True)
         worker.start()
 
-    # crawl_worker_loop(q, browsers[0], cj)
+# crawl_worker_loop(q, browsers[0], cj)
 
-    q.join()
+q.join()
