@@ -242,4 +242,8 @@ else:
 
 # crawl_worker_loop(q, browsers[0], cj)
 
-q.join()
+try:
+    q.join()
+finally:
+    for b in browsers:
+        b.quit()
