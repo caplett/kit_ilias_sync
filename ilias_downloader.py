@@ -219,7 +219,6 @@ login_cookies = dict()
 for c in browser_cookies:
     login_cookies[str(c["name"])] = str(c["value"])
 
-# q = Queue()
 q = LifoQueue()
 q.put([url, base_path, False])
 
