@@ -1,0 +1,6 @@
+browser-cookie3
+requests
+pyyaml
+beautifulsoup4
+selenium
+lxml
