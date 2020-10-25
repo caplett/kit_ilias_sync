@@ -69,8 +69,8 @@ def crawl_url(q, browser, cj):
 
     if next_url in seen_urls:
         print(f"Skipping {next_url}. already seen")
-    else:    
-    
+    else:
+
         print(f"Processing {path}")
 
         r_head = requests.get(base_url + next_url, cookies=cj, stream=True)
@@ -81,7 +81,7 @@ def crawl_url(q, browser, cj):
             if download_pdf:
                 # pdf_name = r_head.headers["Content-Description"].replace(" ", "_").translate( {ord(i): None for i in '/,"{}()[]'})
                 pdf_name = path + ".pdf"
-                                    
+
                 print(f"downloading {pdf_name}")
 
                 if not os.path.isfile(pdf_name):
