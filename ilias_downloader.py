@@ -2,6 +2,7 @@ import browser_cookie3
 import requests
 import time
 import os
+import pathlib
 import shutil
 import yaml
 import threading
@@ -19,13 +20,14 @@ from selenium.webdriver.common.by import By
 
 cj = browser_cookie3.firefox()
 
-with open("config.yml", "r") as config_file:
+PATH = pathlib.Path(__file__).parent.absolute()
+with open(f"{PATH}/config.yml", "r") as config_file:
     cfg = yaml.load(config_file)
 
 base_url = cfg["credentials"]["base_url"]
 url = cfg["credentials"]["url"]
 
-base_path = cfg["credentials"]["base_path"]
+base_path = f"{PATH}/" + cfg["credentials"]["base_path"]
 
 login_url = cfg["credentials"]["login_url"]
 uname = cfg["credentials"]["uname"]
