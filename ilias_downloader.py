@@ -39,7 +39,7 @@ seen_urls = []
 
 def create_browser(options, url, uname, password):
     print("Setup Browser")
-    browser = webdriver.Firefox(options=options)
+    browser = webdriver.Firefox(options=options, service_log_path="/tmp/geckodriver.log")
     browser.get(url)
 
     elem = browser.find_element_by_name("home_organization_selection")
