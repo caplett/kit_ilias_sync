@@ -1,1 +1,10 @@
+# Ignore config file
 config.yml
+
+# Ignore files beeing downloaded
+ilias/
+
+# Python
+venv/
+
+ignore/

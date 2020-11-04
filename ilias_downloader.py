@@ -2,6 +2,7 @@ import browser_cookie3
 import requests
 import time
 import os
+import pathlib
 import shutil
 import yaml
 import threading
@@ -19,13 +20,14 @@ from selenium.webdriver.common.by import By
 
 cj = browser_cookie3.firefox()
 
-with open("config.yml", "r") as config_file:
+PATH = pathlib.Path(__file__).parent.absolute()
+with open(f"{PATH}/config.yml", "r") as config_file:
     cfg = yaml.load(config_file)
 
 base_url = cfg["credentials"]["base_url"]
 url = cfg["credentials"]["url"]
 
-base_path = cfg["credentials"]["base_path"]
+base_path = f"{PATH}/" + cfg["credentials"]["base_path"]
 
 login_url = cfg["credentials"]["login_url"]
 uname = cfg["credentials"]["uname"]
@@ -37,7 +39,7 @@ seen_urls = []
 
 def create_browser(options, url, uname, password):
     print("Setup Browser")
-    browser = webdriver.Firefox(options=options)
+    browser = webdriver.Firefox(options=options, service_log_path="/tmp/geckodriver.log")
     browser.get(url)
 
     elem = browser.find_element_by_name("home_organization_selection")
@@ -69,8 +71,8 @@ def crawl_url(q, browser, cj):
 
     if next_url in seen_urls:
         print(f"Skipping {next_url}. already seen")
-    else:    
-    
+    else:
+
         print(f"Processing {path}")
 
         r_head = requests.get(base_url + next_url, cookies=cj, stream=True)
@@ -81,7 +83,7 @@ def crawl_url(q, browser, cj):
             if download_pdf:
                 # pdf_name = r_head.headers["Content-Description"].replace(" ", "_").translate( {ord(i): None for i in '/,"{}()[]'})
                 pdf_name = path + ".pdf"
-                                    
+
                 print(f"downloading {pdf_name}")
 
                 if not os.path.isfile(pdf_name):
