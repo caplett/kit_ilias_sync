@@ -6,17 +6,11 @@ import pathlib
 import shutil
 import yaml
 import threading
-from queue import Queue, LifoQueue
+from queue import LifoQueue
 from bs4 import BeautifulSoup
 import selenium
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver import ActionChains
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 
 cj = browser_cookie3.firefox()
 
@@ -37,9 +31,12 @@ download_pdf = cfg["credentials"].get("pdf")
 
 seen_urls = []
 
+
 def create_browser(options, url, uname, password):
     print("Setup Browser")
-    browser = webdriver.Firefox(options=options, service_log_path="/tmp/geckodriver.log")
+    browser = webdriver.Firefox(
+        options=options, service_log_path="/tmp/geckodriver.log"
+    )
     browser.get(url)
 
     elem = browser.find_element_by_name("home_organization_selection")
@@ -87,7 +84,7 @@ def crawl_url(q, browser, cj):
                 print(f"downloading {pdf_name}")
 
                 if not os.path.isfile(pdf_name):
-                    with open(pdf_name, 'wb') as f:
+                    with open(pdf_name, "wb") as f:
                         f.write(r_head.content)
                 else:
                     print(f"Skipped {pdf_name}")
@@ -99,14 +96,14 @@ def crawl_url(q, browser, cj):
                 print(f"downloading {file_name}")
 
                 if not os.path.isfile(file_name):
-                    with open(file_name, 'wb') as f:
+                    with open(file_name, "wb") as f:
                         f.write(r_head.content)
                 else:
                     print(f"Skipped {file_name}")
 
         else:
 
-            if expect_video == False:
+            if expect_video is False:
                 r = requests.get(base_url + next_url, cookies=cj)
                 soup = BeautifulSoup(r.text, "lxml")
                 items = soup.find_all("a", class_="il_ContainerItemTitle")
@@ -149,7 +146,7 @@ def crawl_url(q, browser, cj):
                                 ]
                             )
 
-            if expect_video == True:
+            if expect_video is True:
                 try:
                     browser.get(base_url + next_url)
                     time.sleep(20)
@@ -181,7 +178,11 @@ def crawl_url(q, browser, cj):
                     for item in items:
                         if item.string == "Abspielen":
                             q.put(
-                                [item.attrs["href"].replace(base_url, ""), path, True,]
+                                [
+                                    item.attrs["href"].replace(base_url, ""),
+                                    path,
+                                    True,
+                                ]
                             )
                         else:
                             print("Skipped Download button")
@@ -191,9 +192,12 @@ def crawl_url(q, browser, cj):
                         if item.string == "weiter":
                             print(f"found a next video page for {path}/{name}")
                             q.put(
-                                [item.attrs["href"].replace(base_url, ""), path, True,]
+                                [
+                                    item.attrs["href"].replace(base_url, ""),
+                                    path,
+                                    True,
+                                ]
                             )
-
 
                 except selenium.common.exceptions.TimeoutException:
                     print(f"Timeout at {path}/{next_url}")

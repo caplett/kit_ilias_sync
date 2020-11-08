@@ -7,4 +7,7 @@ ilias/
 # Python
 venv/
 
+# Editors
+.vim/
+
 ignore/
