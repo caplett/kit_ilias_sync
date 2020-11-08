@@ -11,7 +11,13 @@ credentials:
 
     # The place where files get safed
     base_path : "ilias"
-    
+
+    # Folder names which should be ignored
+    # NOTE: Do not look at the folder name in ilias! Instead look at the one on your hard drive!
+    blacklisted_folders :
+        - "Folder_1"
+        - "Folder_2"
+
     # Dont get to crazy here
     num_threads : 4
 

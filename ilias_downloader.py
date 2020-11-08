@@ -29,6 +29,8 @@ url = cfg["credentials"]["url"]
 
 base_path = f"{PATH}/" + cfg["credentials"]["base_path"]
 
+blacklisted_folders = cfg["credentials"]["blacklisted_folders"]
+
 login_url = cfg["credentials"]["login_url"]
 uname = cfg["credentials"]["uname"]
 password = cfg["credentials"]["password"]
@@ -69,7 +71,13 @@ def crawl_url(q, browser, cj):
 
     global seen_urls
 
-    if next_url in seen_urls:
+    # Subtract base_path of path and get a list of remaining folders
+    folders = path.replace(base_path, '').split("/")
+
+    # Check if both lists overlap
+    if bool(set(blacklisted_folders) & set(folders)):
+        print(f"Skipping {path} - Folder is blacklisted.")
+    elif next_url in seen_urls:
         print(f"Skipping {next_url}. already seen")
     else:
 
