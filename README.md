@@ -1,40 +1,49 @@
 # kit_ilias_sync
 Ilias Sync script for KIT
 
-Currently just for firefox and non pdf files *wink*
-
 Have an eye for the script output for the first few files.
-If you are not logged in you see a loop.
-You should see the courses from your dashboard
-
+If you are not logged in, you see a loop.<br/>
+You should see the courses from your dashboard.
 
 ## Requirements
 
-additional to python libraries:
+-   python3, python3-pip and python3-venv
+-   Python packages inside requirements.txt
+-   [Geckodriver](https://github.com/mozilla/geckodriver/releases) - Necessary to start firefox workers
 
-### Geckodriver
-
-https://github.com/mozilla/geckodriver/releases
-Necessary to start firefox workers
-
-### Password requirements
-
-Currently passwords with a '\' letter have problems getting escaped and do not work.
-You can change you password or fix the issue.
 
 ## Getting Started
 
-Move config.yml.back to config.yml
+Setup an Python virtual environment:
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
 
-Fill in config
+Install Python packages:
+```bash
+pip install -r requirements.txt
+```
 
-Launch python file
+Copy the config and adjust it to your liking:
+```bash
+cp config.yml.example config.yml
+$EDITOR config.yml
+```
 
-## TODOs
+Download the [Geckodriver](https://github.com/mozilla/geckodriver/releases) and move it into an executable path:
+```bash
+mv $GECKODRIVER_FILE venv/include
+```
 
- * [ ] Handle if user is not logged in
- * [ ] Handle pdf files
- * [ ] Handle forum
- * [ ] Update Readme
-    * [ ] python requirements
-    * [ ] Getting Started
+Start the script:
+```bash
+python3 ilias_downloader.py
+```
+
+## Known issues
+
+### Passwords
+
+Currently passwords with a '\\' letter have problems getting escaped and do not work.<br/>
+You can change your password or fix the issue.
