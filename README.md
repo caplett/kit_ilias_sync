@@ -33,7 +33,7 @@ $EDITOR config.yml
 
 Download the [Geckodriver](https://github.com/mozilla/geckodriver/releases) and move it into an executable path:
 ```bash
-mv $GECKODRIVER_FILE venv/include
+mv $GECKODRIVER_FILE venv/bin
 ```
 
 Start the script:
